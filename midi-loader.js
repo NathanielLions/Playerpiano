@@ -1,10 +1,11 @@
 /**
  * midi-loader.js - Pure browser MIDI parser.
  * Matches the JSON structure previously provided by the Flask backend.
+ * Updated to handle normalized/raw CC values and dangling pedal states.
  */
 export async function parseMidiFile(file) {
     const arrayBuffer = await file.arrayBuffer();
-    const midi = new Midi(arrayBuffer); // Provided by the ToneJS CDN script
+    const midi = new Midi(arrayBuffer);
     
     const parsedNotes = [];
     const sustain = [];
@@ -26,20 +27,32 @@ export async function parseMidiFile(file) {
             let pedalStart = null;
             
             events.forEach(cc => {
-                if (cc.value >= 64 && pedalStart === null) {
+                // Determine if pedal is pressed, supporting both raw (0-127) and normalized (0-1) values
+                const pressed = cc.value > 1 ? cc.value >= 64 : cc.value >= 0.5;
+                
+                if (pressed && pedalStart === null) {
                     pedalStart = cc.time;
-                } else if (cc.value < 64 && pedalStart !== null) {
+                } else if (!pressed && pedalStart !== null) {
                     const interval = { start: pedalStart, end: cc.time };
                     if (ccNumber === 64) sustain.push(interval);
                     else soft.push(interval);
                     pedalStart = null;
                 }
             });
+            
+            // Close dangling pedals held until end-of-file
+            if (pedalStart !== null) {
+                const interval = { start: pedalStart, end: midi.duration };
+                if (ccNumber === 64) sustain.push(interval);
+                else soft.push(interval);
+            }
         });
     });
 
-    // Deterministic sort
+    // Deterministic sort for notes and pedals
     parsedNotes.sort((a, b) => (a.start - b.start) || (a.pitch - b.pitch));
+    sustain.sort((a, b) => a.start - b.start);
+    soft.sort((a, b) => a.start - b.start);
 
     return {
         filename: file.name,
