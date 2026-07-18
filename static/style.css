@@ -1,0 +1,235 @@
+:root {
+    --bg-base: #09090b;
+    --bg-panel: #18181b;
+    --border: #27272a;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --text-main: #f4f4f5;
+    --text-muted: #a1a1aa;
+    --paper-color: #FBF7F0;
+    --key-white: #f8fafc;
+    --key-black: #0f172a;
+    --key-active: #ea580c;
+    
+    --state-info: #a7f3d0;
+    --state-warning: #f59e0b;
+    --state-danger: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.demo-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+    gap: 16px;
+}
+
+/* Header & Controls Panel */
+.panel-section {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 24px;
+}
+
+.header-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.header-panel h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+}
+
+.upload-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 6px;
+    padding: 12px 24px;
+    cursor: pointer;
+    background: var(--bg-base);
+    transition: border-color 0.2s, background-color 0.2s;
+    position: relative;
+    outline: none;
+}
+
+.drop-zone:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.drop-zone:hover {
+    border-color: var(--accent);
+    background-color: rgba(37, 99, 235, 0.05);
+}
+
+.drop-zone input {
+    display: none;
+}
+
+.drop-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.song-info {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--state-info);
+    flex: 1;
+    min-width: 200px;
+}
+
+.controls-row {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.btn:hover { background: var(--accent-hover); }
+.btn.secondary { background: var(--bg-base); border: 1px solid var(--border); color: var(--text-main); }
+.btn.secondary:hover { background: var(--border); }
+
+/* Master Visualizer Viewport */
+.viewport-panel {
+    flex: 1;
+    background-color: #050507;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.canvas-container {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #0d0d11;
+}
+
+#rollCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--paper-color);
+}
+
+/* Structural Tracker Detector Bar Overlay - Raised Above Keyboard */
+.tracker-bar {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: rgba(234, 88, 12, 0.3);
+    border-top: 2px solid var(--key-active);
+    border-bottom: 2px solid var(--key-active);
+    z-index: 5;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tracker-label {
+    font-size: 0.6rem;
+    color: var(--key-active);
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    background: #050507;
+    padding: 0 8px;
+    transform: translateY(-1px);
+}
+
+/* Keyboard System Styles (MIDI 24 to 96 -> 73 Keys: 43 White, 30 Black) */
+.keyboard-container {
+    height: 140px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    background: #000;
+    border-top: 4px solid #111;
+    padding-bottom: 4px;
+}
+
+.key {
+    position: absolute;
+    top: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.key.white {
+    height: 100%;
+    background: var(--key-white);
+    border-right: 1px solid #cbd5e1;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    z-index: 1;
+    box-shadow: inset 0 -4px 0 #cbd5e1;
+}
+
+.key.black {
+    height: 60%;
+    background: var(--key-black);
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    z-index: 2;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+
+.key.white.active {
+    background: var(--key-active);
+    box-shadow: inset 0 -1px 0 #b45309;
+}
+
+.key.black.active {
+    background: #c2410c;
+}
