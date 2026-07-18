@@ -1,0 +1,56 @@
+/**
+ * midi-loader.js - Pure browser MIDI parser.
+ * Matches the JSON structure previously provided by the Flask backend.
+ */
+export async function parseMidiFile(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const midi = new Midi(arrayBuffer); // Provided by the ToneJS CDN script
+    
+    const parsedNotes = [];
+    const sustain = [];
+    const soft = [];
+    
+    midi.tracks.forEach(track => {
+        track.notes.forEach(note => {
+            parsedNotes.push({
+                pitch: note.midi,
+                velocity: Math.round(note.velocity * 127),
+                start: note.time,
+                end: note.time + note.duration
+            });
+        });
+        
+        // Pair sustain (64) and soft (67) pedal events
+        [64, 67].forEach(ccNumber => {
+            const events = track.controlChanges[ccNumber] || [];
+            let pedalStart = null;
+            
+            events.forEach(cc => {
+                if (cc.value >= 64 && pedalStart === null) {
+                    pedalStart = cc.time;
+                } else if (cc.value < 64 && pedalStart !== null) {
+                    const interval = { start: pedalStart, end: cc.time };
+                    if (ccNumber === 64) sustain.push(interval);
+                    else soft.push(interval);
+                    pedalStart = null;
+                }
+            });
+        });
+    });
+
+    // Deterministic sort
+    parsedNotes.sort((a, b) => (a.start - b.start) || (a.pitch - b.pitch));
+
+    return {
+        filename: file.name,
+        title: midi.header.name || "Untitled Song",
+        ppq: midi.header.ppq,
+        trackCount: midi.tracks.length,
+        duration: midi.duration,
+        tempo: Math.round(midi.header.tempos[0]?.bpm || 120),
+        timeSignature: midi.header.timeSignatures[0]?.timeSignature || [4, 4],
+        noteCount: parsedNotes.length,
+        notes: parsedNotes,
+        pedals: { sustain, soft }
+    };
+}
