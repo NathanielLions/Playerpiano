@@ -161,7 +161,7 @@ body {
     background-color: var(--paper-color);
 }
 
-/* Structural Tracker Detector Bar Overlay - Raised Above Keyboard */
+/* Structural Tracker Detector Bar Overlay */
 .tracker-bar {
     position: absolute;
     bottom: 40px;
@@ -188,7 +188,7 @@ body {
     transform: translateY(-1px);
 }
 
-/* Keyboard System Styles (MIDI 24 to 96 -> 73 Keys: 43 White, 30 Black) */
+/* Keyboard System Styles */
 .keyboard-container {
     height: 140px;
     width: 100%;
