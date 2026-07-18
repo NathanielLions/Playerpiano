@@ -4,6 +4,7 @@
  */
 
 // Visual Constants & Engine Calibration Scalars
+import { parseMidiFile } from "./midi-loader.js";
 const SCROLL_SPEED_PX_SEC = 120; 
 const MIN_MIDI = 24;
 const MAX_MIDI = 96;
@@ -258,40 +259,32 @@ function animationTick(timestamp) {
 // ==============================================================================
 
 async function handleMidiUpload(file) {
-    const formData = new FormData();
-    formData.append('midi', file);
-    
-    songInfo.innerHTML = `<div style="color:var(--state-warning)">Parsing file track parameters on host...</div>`;
+    songInfo.innerHTML = `<div style="color:var(--state-warning)">Parsing file locally...</div>`;
     
     try {
-        const response = await fetch('/upload', { method: 'POST', body: formData });
-        const data = await response.json();
+        const data = await parseMidiFile(file);
         
-        if (data.success) {
-            songData = data.song;
-            renderNotes = precomputeNotes(songData.notes);
-            
-            songInfo.innerHTML = `
-                <strong>File:</strong> ${songData.filename}<br>
-                <strong>Title:</strong> ${songData.title.substring(0, 24)}<br>
-                <span>Notes: ${songData.noteCount} | Tracks: ${songData.trackCount} | Tempo: ${songData.tempo} BPM | Time Sig: ${songData.timeSignature.join('/')} | Duration: ${songData.duration}s</span>
-            `;
-            
-            elapsedTime = 0;
-            startTime = 0;
-            isPlaying = false;
-            playPauseBtn.textContent = "Play";
-            controlsRow.style.display = 'flex';
-            
-            resizeCanvasToContainer();
-        } else {
-            songInfo.innerHTML = `<div style="color:var(--state-danger)">Error: ${data.error}</div>`;
-        }
+        songData = data;
+        renderNotes = precomputeNotes(songData.notes);
+        
+        songInfo.innerHTML = `
+            <strong>File:</strong> ${songData.filename}<br>
+            <strong>Title:</strong> ${songData.title.substring(0, 24)}<br>
+            <span>Notes: ${songData.noteCount} | Tracks: ${songData.trackCount} | Tempo: ${songData.tempo} BPM</span>
+        `;
+        
+        elapsedTime = 0;
+        startTime = 0;
+        isPlaying = false;
+        playPauseBtn.textContent = "Play";
+        controlsRow.style.display = 'flex';
+        
+        resizeCanvasToContainer();
     } catch (err) {
-        songInfo.innerHTML = `<div style="color:var(--state-danger)">Failed to connect to backend compiler server.</div>`;
+        songInfo.innerHTML = `<div style="color:var(--state-danger)">Error parsing MIDI: ${err.message}</div>`;
+        console.error(err);
     }
 }
-
 // Setup Interactive UI Listeners
 dropZone.addEventListener('click', () => midiInput.click());
 midiInput.addEventListener('change', (e) => { if (e.target.files.length) handleMidiUpload(e.target.files[0]); });
