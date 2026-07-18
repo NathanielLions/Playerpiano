@@ -1,19 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Piano Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load ToneJS MIDI library -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
 </head>
 <body>
 
-<script>
-console.log(window.Midi);
-console.log(typeof Midi);
-</script>
+    <div class="demo-container">
+        <!-- System Control / Upload Header -->
+        <div class="panel-section header-panel">
+            <h1>Player Piano Visualizer</h1>
+            <div class="upload-row">
+                <div class="drop-zone" id="dropZone" tabindex="0">
+                    <span class="drop-text">Drag & Drop MIDI Here or Click to Browse</span>
+                    <input type="file" id="midiInput" accept=".mid,.midi">
+                </div>
+                <div class="song-info" id="songInfo">
+    Awaiting MIDI Upload...
+</div>
+                <div class="controls-row" id="controlsRow" style="display: none;">
+                    <button id="playPauseBtn" class="btn">Play</button>
+                    <button id="resetBtn" class="btn secondary">Reset</button>
+                </div>
+            </div>
+        </div>
 
-  <!-- Load library first -->
-<script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
-<!-- Load application logic as module -->
-<script type="module" src="app.js"></script>
-  
+        <!-- Master Viewport: Sliced Paper View + Keyboard Base -->
+        <div class="viewport-panel">
+            <div class="canvas-container" id="canvasContainer">
+                <!-- The Core Unified Moving Paper Canvas -->
+                <canvas id="rollCanvas"></canvas>
+                <!-- Physical Mechanical Tracker Bar Separator Line -->
+                <div class="tracker-bar">
+                    <span class="tracker-label">TRACKER BAR DETECTOR LINE</span>
+                </div>
+            </div>
+            
+            <!-- Interactive Keyboard Container -->
+            <div class="keyboard-container" id="pianoKeyboard"></div>
+        </div>
+    </div>
+
+    <!-- Inject Orchestration Engine -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
