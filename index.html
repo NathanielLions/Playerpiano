@@ -251,7 +251,10 @@
             track.notes.forEach(note => {
                 const startMs = Math.round(note.time * 1000);
                 const durationMs = Math.round(note.duration * 1000);
-                const endMs = startMs + Math.round(durationMs * 0.9);
+
+                // Make the note 10% shorter at the END
+                const shortenedDurationMs = Math.round(durationMs * 0.90);
+                const endMs = startMs + shortenedDurationMs;
 
                 if (startMs < absoluteFirstMs) absoluteFirstMs = startMs;
 
