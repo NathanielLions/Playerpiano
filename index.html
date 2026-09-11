@@ -245,7 +245,9 @@
             }
         }
 
-        let absoluteFirstMs = Infinity;
+        // First actual playable note.
+// This is used to remove all silence/rests at the beginning.
+let absoluteFirstMs = Infinity;
 
         midi.tracks.forEach(track => {
             track.notes.forEach(note => {
@@ -282,7 +284,7 @@
                     const ccList = track.controlChanges[ccNumber];
                     ccList.forEach(ccEvent => {
                         const eventMs = Math.round(ccEvent.time * 1000);
-                        if (eventMs < absoluteFirstMs) absoluteFirstMs = eventMs;
+                    
 
                         initTimeSlot(eventMs);
                         if (parseInt(ccNumber) === 64) timeline[eventMs].sustain = (ccEvent.value > 0.5) ? "S1" : "S0";
@@ -321,7 +323,9 @@
            PART 2: CANVAS PAPER ROLL GENERATION
            ========================================== */
         let rawEvents = [];
-        let absoluteFirstY = Infinity;
+        // First actual note position.
+// Control changes do not determine where the roll starts.
+let absoluteFirstY = Infinity;
 
         midi.tracks.forEach(track => {
             track.notes.forEach(note => {
@@ -393,7 +397,17 @@
 
         rawEvents.forEach(ev => {
             const adjustedY = ev.rawY - timeShiftOffsetY;
-            events.push({ track: ev.track, y: adjustedY, height: ev.height });
+
+// Ignore events that occur completely before the first note.
+if (adjustedY + ev.height <= 0) {
+    return;
+}
+
+events.push({
+    track: ev.track,
+    y: Math.max(0, adjustedY),
+    height: ev.height
+});
             if (adjustedY + ev.height > maxShiftedY) {
                 maxShiftedY = adjustedY + ev.height;
             }
